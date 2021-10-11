@@ -17,8 +17,9 @@ if (!selfCal) {
 
 // Motor state setup
 // Use to trim motors if one is stronger than the other
-let leftMotorTrim = 0;
-let rightMotorTrim = 0;
+//let leftMotorTrim = 0;
+//let rightMotorTrim = 0;
+let motorTrim = 8;
 let steeringBias: number = 0;
 let maxSteerBias: number = 50; //Maximum turn rate
 let outMax = 1023;
@@ -27,15 +28,23 @@ let outMin = -1023;
 //**************************
 //****PID state setup*******
 //**************************
-let Kp = 120;  //100
-let Ki = 1500;  //2000 
-let Kd = 1.9;  //1.5
-// Manage baseline motor speed ie the value from which motor values have an affect
+/*
+    PID algorithm
+        Actuator_Output =
+            Kp * (distance from goal)
+        +   Ki * (accumulative error)
+        +   Kd * (change in error)
+*/
+let Kp = 150;  //120
+let Ki = 1200;  //1500
+let Kd = 3;  //1.9
 
+// Manage baseline motor speed ie the value from which motor values have an affect
 let motorMin = 30;  //138
 let blackOut: boolean = false;
+let blackOutThreshold = 30;
 let setPoint = 0;
-let y_Offset: number = -98.5;
+let y_Offset: number = -80;   //-80
 
 let cycleDelay = 2;  //miliseconds
 let y: number = 0;
@@ -92,7 +101,7 @@ while (1) {
 
     gap = Math.abs(setPoint - y);
 
-    if (gap > 25) {
+    if (gap > blackOutThreshold) {
         blackOut = true;
     }
     if (gap < 2) {
@@ -111,13 +120,7 @@ while (1) {
 }
 
 function PID(input: number): number {
-    /*
-        PID algorithm
-            Actuator_Output =
-                Kp * (distance from goal) 
-            +   Ki * (accumulative error)
-            +   Kd * (change in error)
-    */
+
     let now = game.currentTime();    // in milliseconds
     let timeChange = (now - lastTime) / 1000;    //convert to seconds
     let distance_from_goal: number = (setPoint - input); // P
@@ -176,9 +179,9 @@ function motorController(speed: number) {
         pins.digitalWritePin(DigitalPin.P16, 1);
     }
 
-    pins.analogWritePin(AnalogPin.P0, Math.abs(speed + rightMotorTrim + steeringBias));
+    pins.analogWritePin(AnalogPin.P0, Math.abs(speed + motorTrim + steeringBias));
     pins.analogSetPeriod(AnalogPin.P0, 2500);
-    pins.analogWritePin(AnalogPin.P1, Math.abs(speed + leftMotorTrim - steeringBias));
+    pins.analogWritePin(AnalogPin.P1, Math.abs(speed - motorTrim - steeringBias));
     pins.analogSetPeriod(AnalogPin.P1, 2500);
 
 }
