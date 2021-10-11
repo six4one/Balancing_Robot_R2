@@ -27,8 +27,8 @@ let outMin = -1023;
 //**************************
 //****PID state setup*******
 //**************************
-let Kp = 120;  //90
-let Ki = 2000;  //900 
+let Kp = 120;  //100
+let Ki = 1500;  //2000 
 let Kd = 1.9;  //1.5
 // Manage baseline motor speed ie the value from which motor values have an affect
 
