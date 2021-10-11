@@ -19,7 +19,7 @@ if (!selfCal) {
 // Use to trim motors if one is stronger than the other
 //let leftMotorTrim = 0;
 //let rightMotorTrim = 0;
-let motorTrim = 8;
+let motorTrim = -10;
 let steeringBias: number = 0;
 let maxSteerBias: number = 50; //Maximum turn rate
 let outMax = 1023;
@@ -34,13 +34,15 @@ let outMin = -1023;
             Kp * (distance from goal)
         +   Ki * (accumulative error)
         +   Kd * (change in error)
+        +   Ks * (current speed)
 */
 let Kp = 150;  //120
-let Ki = 1200;  //1500
+let Ki = 700;  //1500
 let Kd = 3;  //1.9
+let Ks = 0.4;
 
 // Manage baseline motor speed ie the value from which motor values have an affect
-let motorMin = 30;  //138
+let motorMin = 15;  //30
 let blackOut: boolean = false;
 let blackOutThreshold = 30;
 let setPoint = 0;
@@ -54,6 +56,7 @@ let lean: number = 0;
 let leanLimit: number = 0.5;   //Maximum controlled lean allowed in degrees(travel speed)
 let lastInput = 0;
 let lastTime = 0;
+let lastOutput = 0;
 let accumulative_error: number = 0;
 let last_error: number = 0;
 let Actuator_Output: number = 0;
@@ -119,7 +122,7 @@ while (1) {
     }
 }
 
-function PID(input: number): number {
+function PID(input: number, ): number {
 
     let now = game.currentTime();    // in milliseconds
     let timeChange = (now - lastTime) / 1000;    //convert to seconds
@@ -131,8 +134,7 @@ function PID(input: number): number {
     }
     let change_in_error = (distance_from_goal - last_error) / timeChange; // D
     last_error = distance_from_goal;
-
-    Actuator_Output = Kp * distance_from_goal + Ki * accumulative_error + Kd * change_in_error;
+    Actuator_Output = Kp * distance_from_goal + Ki * accumulative_error + Kd * change_in_error + Ks*lastOutput;
 
     let outputAbs: number = Math.abs(Actuator_Output) + motorMin;    // A base motor speed to over come motor inertia and restrict maximum power 
     if (outputAbs > outMax) {  //Saturation Check
@@ -151,6 +153,7 @@ function PID(input: number): number {
     }
     lastInput = input;
     lastTime = now;
+    lastOutput = Actuator_Output
 
     return Actuator_Output;
 }
