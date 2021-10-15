@@ -19,7 +19,7 @@ if (!selfCal) {
 // Use to trim motors if one is stronger than the other
 //let leftMotorTrim = 0;
 //let rightMotorTrim = 0;
-let motorTrim = -10;
+let motorTrim = 0;
 let steeringBias: number = 0;
 let maxSteerBias: number = 50; //Maximum turn rate
 let outMax = 1023;
@@ -36,10 +36,10 @@ let outMin = -1023;
         +   Kd * (change in error)
         +   Ks * (current speed)
 */
-let Kp = 150;  //120
-let Ki = 700;  //1500
-let Kd = 3;  //1.9
-let Ks = 0.4;
+let Kp = 350;  //120
+let Ki = 1300;  //1500
+let Kd = 3;  //3
+let Ks = 0; //0.4
 
 // Manage baseline motor speed ie the value from which motor values have an affect
 let motorMin = 15;  //30
